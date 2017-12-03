@@ -3,6 +3,9 @@ local game = {}
 function game:init()
   self.img = {
     table = love.graphics.newImage("assets/table.png"),
+    monsters = {
+      love.graphics.newImage("assets/monster0.png"),
+    },
   }
 end
 
@@ -10,7 +13,17 @@ local function distance(a,b)
   return math.sqrt( (a.x - b.x)^2 + (a.y - b.y)^2 )
 end
 
+function game:add_monster()
+  table.insert(self.monsters,{
+    x = love.graphics.getWidth()/2+(love.graphics.getWidth()/2)*(math.random(0,1)*2-1),
+    y = love.graphics.getHeight()/4,
+    rad = 64,
+    img = self.img.monsters[math.random(#self.img.monsters)],
+  })
+end
+
 function game:enter()
+  self.monsters = {}
   self.mouth = {
     x = love.graphics.getWidth()/2,
     y = love.graphics.getHeight()/4,
@@ -77,6 +90,18 @@ function game:enter()
 end
 
 function game:draw()
+  for _,monster in pairs(self.monsters) do
+    if monster.x < love.graphics.getWidth()/2 then
+      love.graphics.draw(monster.img,monster.x-monster.img:getWidth(),0,0,-1,1,monster.img:getWidth(),0)
+      love.graphics.circle("line",monster.x-monster.rad*2,monster.y,monster.rad)
+    else
+      love.graphics.draw(monster.img,monster.x,0,0,1,1)
+      love.graphics.circle("line",monster.x+monster.rad*2,monster.y,monster.rad)
+    end
+    if debug_mode then
+      love.graphics.line(monster.x,0,monster.x,love.graphics.getHeight())
+    end
+  end
   love.graphics.draw(self.img.table)
   if debug_mode then
     love.graphics.circle("line",self.bacon.x,self.bacon.y,self.bacon.rad)
@@ -106,6 +131,13 @@ function game:draw()
 end
 
 function game:update(dt)
+  for _,monster in pairs(self.monsters) do
+    if monster.x < love.graphics.getWidth()/2 then
+      monster.x = monster.x + 100*dt
+    else
+      monster.x = monster.x - 100*dt
+    end
+  end
   for _,stove in pairs(self.stoves) do
     if stove.contains == "raw" then
       stove.cook = (stove.cook or 0) + dt
@@ -163,6 +195,10 @@ end
 function game:keypressed(key)
   if key == "`" and love.keyboard.isDown("lshift") then
     debug_mode = not debug_mode
+  end
+  if key == "m" then
+    self.monsters = {}
+    self:add_monster()
   end
 end
 
