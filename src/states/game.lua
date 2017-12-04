@@ -33,6 +33,14 @@ end
 
 function game:enter()
   self.score = 0
+  self.hp = libs.shp.new{
+    on = love.graphics.newImage("assets/health1.png"),
+    off = love.graphics.newImage("assets/health0.png"),
+  }
+  self.hunger = libs.shp.new{
+    on = love.graphics.newImage("assets/hunger1.png"),
+    off = love.graphics.newImage("assets/hunger0.png"),
+  }
   self.pows = {}
   self.monsters = {}
   self.mouth = {
@@ -148,9 +156,14 @@ function game:draw()
     end
   end
   love.graphics.circle("line",self.mouth.x,self.mouth.y,self.mouth.rad)
+  self.hp:draw(0,0)
+  self.hunger:draw(love.graphics.getWidth()-self.hunger:getWidth(),0)
 end
 
 function game:update(dt)
+
+  self.hp.val = (self.hp.val + dt)%1
+  self.hunger.val = (self.hunger.val + dt)%1
 
   if self.score >= self.target then
     libs.gamestate.switch(states.win)

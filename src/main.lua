@@ -9,8 +9,9 @@ states = {
 }
 
 libs = {
-  gamestate = require"gamestate",
-  splash = require"splash",
+  gamestate = require "gamestate",
+  splash = require "splash",
+  shp = require "shp",
 }
 
 function love.load()
