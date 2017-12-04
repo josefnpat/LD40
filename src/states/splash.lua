@@ -45,7 +45,7 @@ end
 
 function splash:update(dt)
   if self._splashes[self._current] == nil then
-    libs.gamestate.switch(states.game)
+    libs.gamestate.switch(states.menu)
   elseif self._splashes[self._current]:done() then
     self._current=self._current+1
   else

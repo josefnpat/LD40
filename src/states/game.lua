@@ -9,7 +9,9 @@ function game:init()
     pows = {
       love.graphics.newImage("assets/pow0.png"),
     },
+    bg = love.graphics.newImage("assets/gamebg.png"),
   }
+  self.target = 32
 end
 
 local function distance(a,b)
@@ -96,6 +98,7 @@ function game:enter()
 end
 
 function game:draw()
+  love.graphics.draw(self.img.bg)
   for _,monster in pairs(self.monsters) do
     if monster.x < love.graphics.getWidth()/2 then
       love.graphics.draw(monster.img,monster.x-monster.img:getWidth(),0,0,-1,1,monster.img:getWidth(),0)
@@ -145,6 +148,10 @@ end
 
 function game:update(dt)
 
+  if self.score >= self.target then
+    libs.gamestate.switch(states.win)
+  end
+
   if self.score > 0 then
     self.monster_timer = (self.monster_timer or math.random(5,6)) - dt
     if self.monster_timer <= 0 then
@@ -168,7 +175,7 @@ function game:update(dt)
     end
 
     if math.abs(monster.x - love.graphics.getWidth()/2) < 8 then
-      love.event.quit()
+      libs.gamestate.switch(states.lose)
     end
 
   end
@@ -245,12 +252,6 @@ function game:update(dt)
       end
     end
 
-  end
-end
-
-function game:keypressed(key)
-  if key == "`" and love.keyboard.isDown("lshift") then
-    debug_mode = not debug_mode
   end
 end
 
