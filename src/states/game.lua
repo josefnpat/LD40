@@ -3,6 +3,7 @@ local game = {}
 function game:init()
   self.img = {
     table = love.graphics.newImage("assets/table.png"),
+    baconman = love.graphics.newImage("assets/baconman.png"),
     monsters = {
       love.graphics.newImage("assets/monster0.png"),
     },
@@ -46,8 +47,8 @@ function game:enter()
   self.pows = {}
   self.monsters = {}
   self.mouth = {
-    x = love.graphics.getWidth()/2,
-    y = love.graphics.getHeight()/4,
+    x = 325,
+    y = 150,
     rad = 16,
   }
   self.bacon = {
@@ -85,8 +86,8 @@ function game:enter()
   local left_hand = {
     x = love.graphics.getWidth()/4,
     y = love.graphics.getHeight()/2,
-    ox = love.graphics.getWidth()*3/8,
-    oy = love.graphics.getHeight()/2,
+    ox = 260,
+    oy = 180,
     movement = {"w","d","s","a"},
     img = {
       empty = love.graphics.newImage("assets/right_empty.png"),
@@ -98,8 +99,8 @@ function game:enter()
   local right_hand = {
     x = love.graphics.getWidth()*3/4,
     y = love.graphics.getHeight()/2,
-    ox = love.graphics.getWidth()*5/8,
-    oy = love.graphics.getHeight()/2,
+    ox = 380,
+    oy = 200,
     movement = {"up","right","down","left"},
     img = {
       empty = love.graphics.newImage("assets/left_empty.png"),
@@ -113,6 +114,9 @@ end
 function game:draw()
   love.graphics.draw(self.img.sky)
   love.graphics.draw(self.img.bg)
+  love.graphics.draw(self.img.baconman,
+    love.graphics.getWidth()/2,0,
+    0,1,1,self.img.baconman:getWidth()/2,0)
   for _,monster in pairs(self.monsters) do
     if monster.x < love.graphics.getWidth()/2 then
       love.graphics.draw(monster.img,monster.x-monster.img:getWidth(),0,0,-1,1,monster.img:getWidth(),0)
@@ -146,18 +150,25 @@ function game:draw()
     love.graphics.draw(pow.img,pow.x,pow.y,pow.r,1,1,pow.img:getWidth()/2,pow.img:getHeight()/2)
   end
   for _,hand in pairs(self.hands) do
+    love.graphics.setLineWidth(32)
+    love.graphics.setColor(245,243,27)
+    love.graphics.circle("fill",hand.ox,hand.oy,16)
+    love.graphics.line(hand.ox,hand.oy,hand.x,hand.y)
+    love.graphics.setLineWidth(1)
+    love.graphics.setColor(255,255,255)
     local img = hand.img.empty
     if hand.contains then img = hand.img[hand.contains] end
     local angle = math.atan2( hand.y - hand.oy, hand.x - hand.ox )+math.pi
     love.graphics.draw(img,hand.x,hand.y,
       angle,1,1,img:getWidth()/2,img:getHeight()/2)
-    love.graphics.line(hand.ox,hand.oy,hand.x,hand.y)
     if debug_mode then
       love.graphics.circle("line",hand.x,hand.y,16)
       love.graphics.print(math.floor(hand.x)..","..math.floor(hand.y),hand.x,hand.y)
     end
   end
-  love.graphics.circle("line",self.mouth.x,self.mouth.y,self.mouth.rad)
+  if debug_mode then
+    love.graphics.circle("line",self.mouth.x,self.mouth.y,self.mouth.rad)
+  end
   self.hp:draw(0,0)
   self.hunger:draw(love.graphics.getWidth()-self.hunger:getWidth(),0)
 end
