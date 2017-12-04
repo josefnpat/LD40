@@ -15,6 +15,7 @@ function menu:init()
 end
 
 function menu:enter()
+  sfxplay("welcome")
   self.options = {
     {lbl="START",exe=function() libs.gamestate.switch(states.game) end},
     {lbl="CONTROLS",exe=function() libs.gamestate.switch(states.controls) end},

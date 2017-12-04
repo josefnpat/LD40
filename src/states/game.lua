@@ -219,6 +219,7 @@ function game:update(dt)
     if math.abs(monster.x - love.graphics.getWidth()/2) < 8 then
       table.remove(self.monsters,imonster)
       self.health = self.health - 1
+      sfxplay("rawr")
       if self.health < 0 then
         libs.gamestate.switch(states.lose)
       end
@@ -231,6 +232,7 @@ function game:update(dt)
       if stove.cook > stove.cook_time then
         stove.contains = "cooked"
         stove.cook = 0
+        sfxplay("ding")
       end
     end
     if stove.contains == "cooked" then
@@ -238,6 +240,7 @@ function game:update(dt)
       if stove.burn > stove.burn_time then
         stove.contains = nil
         stove.burn = 0
+        sfxplay("fart")
       end
     end
   end
@@ -254,6 +257,7 @@ function game:update(dt)
     local distance_to_bacon = distance(hand,self.bacon)
     if distance_to_bacon < self.bacon.rad then
       hand.contains = "raw"
+      sfxplay("bacon")
     end
 
     local distance_to_stove = math.huge
@@ -267,12 +271,14 @@ function game:update(dt)
 
     if hand.contains == "raw" and nearest_stove then
       hand.contains = nil
+      sfxplay("sizzle")
       nearest_stove.contains = "raw"
     end
 
     if nearest_stove and nearest_stove.contains == "cooked" then
       nearest_stove.contains = nil
       hand.contains = "cooked"
+      sfxplay("yes")
     end
 
     local distance_to_mouth = distance(hand,self.mouth)
@@ -280,6 +286,7 @@ function game:update(dt)
       hand.contains = nil
       self.score = self.score + 1
       self.baconman_bite = 1
+      sfxplay("omnomnom")
     end
 
     for imonster,monster in pairs(self.monsters) do
@@ -296,6 +303,7 @@ function game:update(dt)
         tpow.r = math.random(-30,30)/100*math.pi
         table.insert(self.pows,tpow)
         table.remove(self.monsters,imonster)
+        sfxplay("awaywithyou")
       end
     end
 

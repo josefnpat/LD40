@@ -4,6 +4,10 @@ function lose:init()
   self.img = love.graphics.newImage("assets/lose.png")
 end
 
+function lose:enter()
+  sfxplay("lose")
+end
+
 function lose:draw()
   love.graphics.draw(self.img)
 end

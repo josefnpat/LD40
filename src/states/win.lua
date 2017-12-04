@@ -4,6 +4,10 @@ function win:init()
   self.img = love.graphics.newImage("assets/win.png")
 end
 
+function win:enter()
+  sfxplay("win")
+end
+
 function win:draw()
   love.graphics.draw(self.img)
 end
