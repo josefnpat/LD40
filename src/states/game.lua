@@ -181,6 +181,10 @@ function game:draw()
   end
   self.hp:draw(0,0)
   self.hunger:draw(love.graphics.getWidth()-self.hunger:getWidth(),0)
+  if debug_mode then
+    love.graphics.print("health: "..self.health.."/"..self.health_max.."\n"..
+      "score: "..self.score.."/"..self.target)
+  end
 end
 
 function game:update(dt)
@@ -192,8 +196,14 @@ function game:update(dt)
     end
   end
 
-  self.hp.val = self.health/self.health_max
-  self.hunger.val = self.score / self.target
+
+  if debug_mode then
+    self.hp.val = (self.hp.val + dt)%1
+    self.hunger.val = (self.hunger.val + dt)%1
+  else
+    self.hp.val = self.health/self.health_max
+    self.hunger.val = self.score / self.target
+  end
 
   if self.score >= self.target then
     libs.gamestate.switch(states.win)

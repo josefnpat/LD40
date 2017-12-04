@@ -1,6 +1,9 @@
 -- Thanks @bartbes! fixes cygwin buffer
 io.stdout:setvbuf("no")
 
+function love.graphics.getWidth() return 1280/2 end
+function love.graphics.getHeight() return 720/2 end
+
 states = {
   game = require "states.game",
   menu = require "states.menu",
@@ -32,7 +35,6 @@ sfx = {
 }
 
 function sfxplay(sfxname)
-  print(sfxname)
   if sfx[sfxname] then
     for i,v in pairs(sfx) do
       v:stop()
@@ -46,10 +48,27 @@ end
 function love.load()
   libs.gamestate.registerEvents()
   libs.gamestate.switch(states.splash)
+  scale = 1
+end
+
+function love.draw()
+  love.graphics.scale(scale)
 end
 
 function love.keypressed(key)
   if key == "`" and love.keyboard.isDown("lshift") then
     debug_mode = not debug_mode
+  end
+  local update_mode = false
+  if key == "-" then
+    scale = math.max(1,scale - 1)
+    update_mode = true
+  end
+  if key == "=" then
+    scale = scale + 1
+    update_mode = true
+  end
+  if update_mode then
+    love.window.setMode(1280/2*scale,720/2*scale)
   end
 end
