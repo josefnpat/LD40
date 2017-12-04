@@ -4,6 +4,7 @@ function game:init()
   self.img = {
     table = love.graphics.newImage("assets/table.png"),
     baconman = love.graphics.newImage("assets/baconman.png"),
+    baconman_bite = love.graphics.newImage("assets/baconman_bite.png"),
     monsters = {
       love.graphics.newImage("assets/monster0.png"),
     },
@@ -114,7 +115,11 @@ end
 function game:draw()
   love.graphics.draw(self.img.sky)
   love.graphics.draw(self.img.bg)
-  love.graphics.draw(self.img.baconman,
+  local baconman_img = self.img.baconman
+  if self.baconman_bite and (self.baconman_bite*6)%1 > 0.5 then
+    baconman_img = self.img.baconman_bite
+  end
+  love.graphics.draw(baconman_img,
     love.graphics.getWidth()/2,0,
     0,1,1,self.img.baconman:getWidth()/2,0)
   for _,monster in pairs(self.monsters) do
@@ -174,6 +179,13 @@ function game:draw()
 end
 
 function game:update(dt)
+
+  if self.baconman_bite then
+    self.baconman_bite = self.baconman_bite - dt
+    if self.baconman_bite <= 0 then
+      self.baconman_bite = nil
+    end
+  end
 
   self.hp.val = self.health/self.health_max
   self.hunger.val = self.score / self.target
@@ -267,6 +279,7 @@ function game:update(dt)
     if hand.contains == "cooked" and distance_to_mouth < self.bacon.rad then
       hand.contains = nil
       self.score = self.score + 1
+      self.baconman_bite = 1
     end
 
     for imonster,monster in pairs(self.monsters) do
