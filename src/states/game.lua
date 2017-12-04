@@ -6,6 +6,9 @@ function game:init()
     monsters = {
       love.graphics.newImage("assets/monster0.png"),
     },
+    pows = {
+      love.graphics.newImage("assets/pow0.png"),
+    },
   }
 end
 
@@ -18,11 +21,14 @@ function game:add_monster()
     x = love.graphics.getWidth()/2+(love.graphics.getWidth()/2)*(math.random(0,1)*2-1),
     y = love.graphics.getHeight()/4,
     rad = 64,
+    xoff = 128,
     img = self.img.monsters[math.random(#self.img.monsters)],
   })
 end
 
 function game:enter()
+  self.score = 0
+  self.pows = {}
   self.monsters = {}
   self.mouth = {
     x = love.graphics.getWidth()/2,
@@ -93,10 +99,14 @@ function game:draw()
   for _,monster in pairs(self.monsters) do
     if monster.x < love.graphics.getWidth()/2 then
       love.graphics.draw(monster.img,monster.x-monster.img:getWidth(),0,0,-1,1,monster.img:getWidth(),0)
-      love.graphics.circle("line",monster.x-monster.rad*2,monster.y,monster.rad)
+      if debug_mode then
+        love.graphics.circle("line",monster.x-monster.xoff,monster.y,monster.rad)
+      end
     else
       love.graphics.draw(monster.img,monster.x,0,0,1,1)
-      love.graphics.circle("line",monster.x+monster.rad*2,monster.y,monster.rad)
+      if debug_mode then
+        love.graphics.circle("line",monster.x+monster.xoff,monster.y,monster.rad)
+      end
     end
     if debug_mode then
       love.graphics.line(monster.x,0,monster.x,love.graphics.getHeight())
@@ -115,6 +125,9 @@ function game:draw()
       love.graphics.circle("line",stove.x,stove.y,stove.rad)
     end
   end
+  for _,pow in pairs(self.pows) do
+    love.graphics.draw(pow.img,pow.x,pow.y,pow.r,1,1,pow.img:getWidth()/2,pow.img:getHeight()/2)
+  end
   for _,hand in pairs(self.hands) do
     local img = hand.img.empty
     if hand.contains then img = hand.img[hand.contains] end
@@ -131,12 +144,33 @@ function game:draw()
 end
 
 function game:update(dt)
+
+  if self.score > 0 then
+    self.monster_timer = (self.monster_timer or math.random(5,6)) - dt
+    if self.monster_timer <= 0 then
+      self:add_monster()
+      self.monster_timer = nil
+    end
+  end
+
+  for ipow,pow in pairs(self.pows) do
+    pow.dt = (pow.dt or 0) + dt
+    pow.r = pow.r + dt
+    if pow.dt > 1 then
+      table.remove(self.pows,ipow)
+    end
+  end
   for _,monster in pairs(self.monsters) do
     if monster.x < love.graphics.getWidth()/2 then
       monster.x = monster.x + 100*dt
     else
       monster.x = monster.x - 100*dt
     end
+
+    if math.abs(monster.x - love.graphics.getWidth()/2) < 8 then
+      love.event.quit()
+    end
+
   end
   for _,stove in pairs(self.stoves) do
     if stove.contains == "raw" then
@@ -168,6 +202,7 @@ function game:update(dt)
     if distance_to_bacon < self.bacon.rad then
       hand.contains = "raw"
     end
+
     local distance_to_stove = math.huge
     local nearest_stove = nil
     for _,stove in pairs(self.stoves) do
@@ -176,17 +211,38 @@ function game:update(dt)
         distance_to_stove,nearest_stove = d,stove
       end
     end
+
     if hand.contains == "raw" and nearest_stove then
       hand.contains = nil
       nearest_stove.contains = "raw"
     end
+
     if nearest_stove and nearest_stove.contains == "cooked" then
       nearest_stove.contains = nil
       hand.contains = "cooked"
     end
+
     local distance_to_mouth = distance(hand,self.mouth)
     if hand.contains == "cooked" and distance_to_mouth < self.bacon.rad then
       hand.contains = nil
+      self.score = self.score + 1
+    end
+
+    for imonster,monster in pairs(self.monsters) do
+      local tpow = {
+        x = monster.x+monster.xoff,
+        y = monster.y,
+      }
+      if monster.x < love.graphics.getWidth()/2 then
+        tpow.x = monster.x - monster.xoff
+      end
+      local d = distance(tpow,hand)
+      if d < monster.rad then
+        tpow.img = self.img.pows[math.random(#self.img.pows)]
+        tpow.r = math.random(-30,30)/100*math.pi
+        table.insert(self.pows,tpow)
+        table.remove(self.monsters,imonster)
+      end
     end
 
   end
@@ -195,10 +251,6 @@ end
 function game:keypressed(key)
   if key == "`" and love.keyboard.isDown("lshift") then
     debug_mode = not debug_mode
-  end
-  if key == "m" then
-    self.monsters = {}
-    self:add_monster()
   end
 end
 
