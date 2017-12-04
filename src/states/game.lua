@@ -10,6 +10,7 @@ function game:init()
       love.graphics.newImage("assets/monster1.png"),
       love.graphics.newImage("assets/monster2.png"),
       love.graphics.newImage("assets/monster3.png"),
+      love.graphics.newImage("assets/monster4.png"),
     },
     pows = {
       love.graphics.newImage("assets/pow0.png"),
