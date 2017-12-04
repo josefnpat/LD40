@@ -27,6 +27,7 @@ sfx = {
   lose = love.audio.newSource("assets/sfx/lose.ogg","static"),
   sizzle = love.audio.newSource("assets/sfx/sizzle.ogg","static"),
   ding = love.audio.newSource("assets/sfx/ding.ogg","static"),
+  fart = love.audio.newSource("assets/sfx/fart.ogg","static"),
 }
 
 function sfxplay(sfxname)
