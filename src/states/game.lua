@@ -7,6 +7,7 @@ function game:init()
     baconman_bite = love.graphics.newImage("assets/baconman_bite.png"),
     monsters = {
       love.graphics.newImage("assets/monster0.png"),
+      love.graphics.newImage("assets/monster1.png"),
     },
     pows = {
       love.graphics.newImage("assets/pow0.png"),
@@ -26,7 +27,7 @@ end
 function game:add_monster()
   table.insert(self.monsters,{
     x = love.graphics.getWidth()/2+(love.graphics.getWidth()/2)*(math.random(0,1)*2-1),
-    y = love.graphics.getHeight()/4,
+    y = love.graphics.getHeight()/3,
     rad = 64,
     xoff = 128,
     img = self.img.monsters[math.random(#self.img.monsters)],
