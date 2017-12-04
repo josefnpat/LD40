@@ -28,9 +28,11 @@ sfx = {
   sizzle = love.audio.newSource("assets/sfx/sizzle.ogg","static"),
   ding = love.audio.newSource("assets/sfx/ding.ogg","static"),
   fart = love.audio.newSource("assets/sfx/fart.ogg","static"),
+  rawr = love.audio.newSource("assets/sfx/rawr.ogg","static"),
 }
 
 function sfxplay(sfxname)
+  print(sfxname)
   if sfx[sfxname] then
     for i,v in pairs(sfx) do
       v:stop()
