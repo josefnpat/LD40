@@ -5,6 +5,7 @@ function menu:init()
   local music = love.audio.newSource(
     "assets/TheUse_-_40_-_Polovetsian_Dance_Crazy_Circus_Music.mp3","stream")
   music:setLooping(true)
+  music:setVolume(0.5)
   music:play()
 
   self.font = love.graphics.newFont("assets/fonts/OpenSansCondensed-Bold.ttf",30)
