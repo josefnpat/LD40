@@ -32,6 +32,8 @@ function game:add_monster()
 end
 
 function game:enter()
+  self.health = 4
+  self.health_max = 4
   self.score = 0
   self.hp = libs.shp.new{
     on = love.graphics.newImage("assets/health1.png"),
@@ -162,8 +164,8 @@ end
 
 function game:update(dt)
 
-  self.hp.val = (self.hp.val + dt)%1
-  self.hunger.val = (self.hunger.val + dt)%1
+  self.hp.val = self.health/self.health_max
+  self.hunger.val = self.score / self.target
 
   if self.score >= self.target then
     libs.gamestate.switch(states.win)
@@ -184,7 +186,7 @@ function game:update(dt)
       table.remove(self.pows,ipow)
     end
   end
-  for _,monster in pairs(self.monsters) do
+  for imonster,monster in pairs(self.monsters) do
     if monster.x < love.graphics.getWidth()/2 then
       monster.x = monster.x + 100*dt
     else
@@ -192,7 +194,11 @@ function game:update(dt)
     end
 
     if math.abs(monster.x - love.graphics.getWidth()/2) < 8 then
-      libs.gamestate.switch(states.lose)
+      table.remove(self.monsters,imonster)
+      self.health = self.health - 1
+      if self.health < 0 then
+        libs.gamestate.switch(states.lose)
+      end
     end
 
   end
