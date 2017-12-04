@@ -16,6 +16,7 @@ function game:init()
       love.graphics.newImage("assets/pow0.png"),
       love.graphics.newImage("assets/pow1.png"),
       love.graphics.newImage("assets/pow2.png"),
+      love.graphics.newImage("assets/pow3.png"),
     },
     bg = love.graphics.newImage("assets/gamebg.png"),
     sky = love.graphics.newImage("assets/sky.png"),
