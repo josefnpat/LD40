@@ -10,6 +10,7 @@ function game:init()
       love.graphics.newImage("assets/pow0.png"),
     },
     bg = love.graphics.newImage("assets/gamebg.png"),
+    sky = love.graphics.newImage("assets/sky.png"),
   }
   self.target = 32
 end
@@ -98,6 +99,7 @@ function game:enter()
 end
 
 function game:draw()
+  love.graphics.draw(self.img.sky)
   love.graphics.draw(self.img.bg)
   for _,monster in pairs(self.monsters) do
     if monster.x < love.graphics.getWidth()/2 then

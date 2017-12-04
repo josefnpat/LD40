@@ -4,6 +4,7 @@ states = {
   splash = require "states.splash",
   win = require "states.win",
   lose = require "states.lose",
+  controls = require "states.controls",
 }
 
 libs = {
