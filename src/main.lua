@@ -5,6 +5,7 @@ states = {
   win = require "states.win",
   lose = require "states.lose",
   controls = require "states.controls",
+  credits = require "states.credits",
 }
 
 libs = {
