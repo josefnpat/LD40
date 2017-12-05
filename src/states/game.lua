@@ -11,6 +11,7 @@ function game:init()
       love.graphics.newImage("assets/monster2.png"),
       love.graphics.newImage("assets/monster3.png"),
       love.graphics.newImage("assets/monster4.png"),
+      love.graphics.newImage("assets/monster5.png"),
     },
     pows = {
       love.graphics.newImage("assets/pow0.png"),
@@ -28,6 +29,12 @@ local function distance(a,b)
   return math.sqrt( (a.x - b.x)^2 + (a.y - b.y)^2 )
 end
 
+function game:keypressed(key)
+  if key == "escape" then
+    self.pause = not self.pause
+  end
+end
+
 function game:add_monster()
   table.insert(self.monsters,{
     x = love.graphics.getWidth()/2+(love.graphics.getWidth()/2)*(math.random(0,1)*2-1),
@@ -39,6 +46,9 @@ function game:add_monster()
 end
 
 function game:enter()
+  self.monster_spawn = 10
+  self.monster_spawn_min = 1
+  self.pause = false
   self.health = 4
   self.health_max = 4
   self.score = 0
@@ -69,9 +79,11 @@ function game:enter()
     rad = 61/2,
     cook_time = 4,
     burn_time = 6,
+    burned_time = 2,
     img = {
       raw = love.graphics.newImage("assets/bacon_raw.png"),
       cooked = love.graphics.newImage("assets/bacon_cooked.png"),
+      burned = love.graphics.newImage("assets/bacon_burned.png"),
     },
   }
   table.insert(self.stoves,left_stove)
@@ -81,9 +93,11 @@ function game:enter()
     rad = 61/2,
     cook_time = 4,
     burn_time = 6,
+    burned_time = 2,
     img = {
       raw = love.graphics.newImage("assets/bacon_raw.png"),
       cooked = love.graphics.newImage("assets/bacon_cooked.png"),
+      burned = love.graphics.newImage("assets/bacon_burned.png"),
     },
   }
   table.insert(self.stoves,right_stove)
@@ -124,8 +138,15 @@ function game:draw()
   if self.baconman_bite and (self.baconman_bite*6)%1 > 0.5 then
     baconman_img = self.img.baconman_bite
   end
+
+  local bx,by = 0,0
+  if self.baconman_pain then
+    bx = math.random(-self.baconman_pain*10,self.baconman_pain*10)
+    by = math.random(-self.baconman_pain*10,self.baconman_pain*10)
+  end
+
   love.graphics.draw(baconman_img,
-    love.graphics.getWidth()/2,0,
+    love.graphics.getWidth()/2+bx,by,
     0,1,1,self.img.baconman:getWidth()/2,0)
   for _,monster in pairs(self.monsters) do
     if monster.x < love.graphics.getWidth()/2 then
@@ -156,9 +177,6 @@ function game:draw()
       love.graphics.circle("line",stove.x,stove.y,stove.rad)
     end
   end
-  for _,pow in pairs(self.pows) do
-    love.graphics.draw(pow.img,pow.x,pow.y,pow.r,1,1,pow.img:getWidth()/2,pow.img:getHeight()/2)
-  end
   for _,hand in pairs(self.hands) do
     love.graphics.setLineWidth(32)
     love.graphics.setColor(245,243,27)
@@ -176,11 +194,23 @@ function game:draw()
       love.graphics.print(math.floor(hand.x)..","..math.floor(hand.y),hand.x,hand.y)
     end
   end
+  for _,pow in pairs(self.pows) do
+    love.graphics.draw(pow.img,pow.x,pow.y,pow.r,1,1,pow.img:getWidth()/2,pow.img:getHeight()/2)
+  end
   if debug_mode then
     love.graphics.circle("line",self.mouth.x,self.mouth.y,self.mouth.rad)
   end
   self.hp:draw(0,0)
   self.hunger:draw(love.graphics.getWidth()-self.hunger:getWidth(),0)
+
+  if self.pause then
+    love.graphics.setColor(0,0,0,127)
+    love.graphics.rectangle("fill",0,0,love.graphics.getWidth(),love.graphics.getHeight())
+    love.graphics.setColor(255,255,255)
+    love.graphics.printf("PAUSED - GETTING BACON",
+      0,love.graphics.getHeight()/2,love.graphics.getWidth(),"center")
+  end
+
   if debug_mode then
     love.graphics.print("health: "..self.health.."/"..self.health_max.."\n"..
       "score: "..self.score.."/"..self.target)
@@ -188,6 +218,17 @@ function game:draw()
 end
 
 function game:update(dt)
+
+  if self.pause then
+    return
+  end
+
+  if self.baconman_pain then
+    self.baconman_pain = self.baconman_pain - dt
+    if self.baconman_pain <= 0 then
+      self.baconman_pain = nil
+    end
+  end
 
   if self.baconman_bite then
     self.baconman_bite = self.baconman_bite - dt
@@ -210,7 +251,8 @@ function game:update(dt)
   end
 
   if self.score > 0 then
-    self.monster_timer = (self.monster_timer or math.random(5,6)) - dt
+    local t = math.max(self.monster_spawn_min,self.monster_spawn)
+    self.monster_timer = (self.monster_timer or math.random(t,t+3)  ) - dt
     if self.monster_timer <= 0 then
       self:add_monster()
       self.monster_timer = nil
@@ -234,6 +276,7 @@ function game:update(dt)
     if math.abs(monster.x - love.graphics.getWidth()/2) < 8 then
       table.remove(self.monsters,imonster)
       self.health = self.health - 1
+      self.baconman_pain = 2
       sfxplay("rawr")
       if self.health < 0 then
         libs.gamestate.switch(states.lose)
@@ -253,9 +296,16 @@ function game:update(dt)
     if stove.contains == "cooked" then
       stove.burn = (stove.burn or 0) + dt
       if stove.burn > stove.burn_time then
-        stove.contains = nil
+        stove.contains = "burned"
         stove.burn = 0
         sfxplay("fart")
+      end
+    end
+    if stove.contains == "burned" then
+      stove.burn = (stove.burn or 0) + dt
+      if stove.burn > stove.burned_time then
+        stove.contains = nil
+        stove.burn = 0
       end
     end
   end
@@ -270,7 +320,7 @@ function game:update(dt)
     hand.y = hand.y + my*self.speed*dt
     hand.y = math.max(0,math.min(love.graphics.getHeight(),hand.y))
     local distance_to_bacon = distance(hand,self.bacon)
-    if distance_to_bacon < self.bacon.rad then
+    if distance_to_bacon < self.bacon.rad and hand.contains == nil then
       hand.contains = "raw"
       sfxplay("bacon")
     end
@@ -284,13 +334,13 @@ function game:update(dt)
       end
     end
 
-    if hand.contains == "raw" and nearest_stove then
+    if hand.contains == "raw" and nearest_stove and nearest_stove.contains == nil then
       hand.contains = nil
       sfxplay("sizzle")
       nearest_stove.contains = "raw"
     end
 
-    if nearest_stove and nearest_stove.contains == "cooked" then
+    if hand.contains == nil  and nearest_stove and nearest_stove.contains == "cooked" then
       nearest_stove.contains = nil
       hand.contains = "cooked"
       sfxplay("yes")
@@ -300,7 +350,8 @@ function game:update(dt)
     if hand.contains == "cooked" and distance_to_mouth < self.bacon.rad then
       hand.contains = nil
       self.score = self.score + 1
-      self.baconman_bite = 1
+      self.baconman_bite = 2
+      self.monster_spawn = self.monster_spawn - 0.5
       sfxplay("omnomnom")
     end
 
